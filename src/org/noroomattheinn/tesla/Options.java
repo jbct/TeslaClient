@@ -29,19 +29,22 @@ public class Options {
     public enum WheelType {
         WT19("Silver 19\""),
         WT1P("Silver 19\""),
-        WTX1("Silver 19\""),
-        WTAE("Aero 19\""),
-        WTAP("Aero 19\""),
-        WTTB("Turbine 19\""),
-        WTTP("Turbine 19\""),
-        WTTG("Turbine 19\" Charcoal"),
-        WTGP("Turbine 19\" Charcoal"),
+        WT20("Silver 20\" Slipstream"),
         WT21("Silver 21\""),
         WT2E("Silver 21\" Euro"),
-        WTSS("Super 21\" Silver"),
-        WTSP("Charcoal 21\""),
+        WTAE("Aero 19\""),
+        WTAP("Aero 19\""),
+        WTAS("Silver 19\" Slipstream"),
+        WTDS("Grey 19\" Slipstream"),
+        WTGP("Turbine 19\" Charcoal"),
         WTSE("Charcoal 21\" Euro"),
         WTSG("Super 21\" Gray"),
+        WTSP("Charcoal 21\""),
+        WTSS("Super 21\" Silver"),
+        WTTB("Turbine 19\""),        
+        WTTP("Turbine 19\""),
+        WTTG("Turbine 19\" Charcoal"),
+        WTX1("Silver 19\""),
         Unknown("Unknown");
         
         private String descriptiveName;
@@ -52,8 +55,11 @@ public class Options {
     }
 
     public enum TrimLevel  {
-        TM00("Standard Production Trim"),
-        TM02("Signature Performance Trim"),
+        TM00("General Production Trim"),
+        TM02("General Production Signature Trim"),
+        TM0A("ALPHA PRE-PRODUCTION NON-SALEABLE"),
+        TM0B("BETA PRE-PRODUCTION NON-SALEABLE"),
+        TM0C("PRE-PRODUCTION SALEABLE"),
         Unknown("Unknown");
 
         private String descriptiveName;
@@ -94,9 +100,13 @@ public class Options {
     }
 
     public enum RoofType {
-        RFBC("Body Color"),
-        RFPO("Panoramic"),
+        RF3G("Glass"),
         RFBK("Black"),
+        RFBC("Body Color"),
+        RFFG("Glass"),
+        RFPO("Panoramic"),
+        RFP2("Sunroof"),
+        RFPX("Model X"),
         Unknown("Unknown");
 
         private String descriptiveName;
@@ -121,20 +131,21 @@ public class Options {
     }
 
     public enum PaintColor {
-        PBCW("Solid White"),
-        PBSB("Black"),
-        PMAB("Metallic Brown"),
-        PMBL("Obsidian Black"),
-        PMMB("Metallic Blue"),
-        PMNG("Steel Grey"),
-        PMSG("Metallic Green"),
-        PMSS("Silver"),
-        PMTG("Metallic Dolphin Gray"),
-        PPMR("Premium Multicoat Red"),
+        PBCW("Catalina White"),
+        PBSB("Sierra Black"),
+        PMAB("Anza Brown Metallic"),
+        PMBL("Obsidian Black Multi-Coat"),
+        PMMB("Monterey Blue Metallic"),
+        PMMR("Multi-Coat Red"),
+        PMNG("Midnight Silver Metallic"),
+        PMSG("Sequoia Green Metallic"),
+        PMSS("San Simeon Silver Metallic"),
+        PMTG("Dolphin Gray Metallic"),
+        PPMR("Muir Red Multi-Coat"),
         PPSB("Deep Blue Metallic"),
-        PPSR("Premium Signature Red"),
-        PPSW("Pearl White"),
-        PPTI("Titanium"),
+        PPSR("Signature Red"),
+        PPSW("Shasta Pearl White Multi-Coat"),
+        PPTI("Titanium Metallic"),
         Unknown("Unknown");
 
         private String descriptiveName;
@@ -161,11 +172,14 @@ public class Options {
     }
 
     public enum DecorType {
+        IDBA("Dark Ash Wood"),
+        IDBO("Figured Ash Wood"),
         IDCF("Carbon Fiber"),
+        IDOM("Matte Obeche Wood"),
+        IDOG("Gloss Obeche Wood"),
         IDLW("Lacewood"),
-        IDOM("Obeche Matte"),
-        IDOG("Obeche Gloss"),
         IDPB("Piano Black"),
+        IDHM("Matte Abachi"),
         Unknown("Unknown");
 
         private String descriptiveName;
@@ -178,10 +192,16 @@ public class Options {
     }
     
     public enum BatteryType  {
-        BT85("85kWh"),
-        BT70("70kWh"),
+        BT37("75kWh (Model 3)"),
+        BT40("40kWh (Software Limited)"),        
         BT60("60kWh"),
-        BT40("40kWh (Software Limited)"),
+        BT70("70kWh"),
+        BT85("85kWh"),
+        BTX4("90kWh"),
+        BTX5("75kWh"),
+        BTX6("100kWh"),
+        BTX7("75kWh"),
+        BTX8("85kWh"),        
         Unknown("Unknown");
 
         private String descriptiveName;
@@ -220,22 +240,48 @@ public class Options {
         @Override public String toString() { return descriptiveName; }
     }
 
-
     public enum Model {
-        // RWD Standard Models
-        S60("S60"),
-        S85("S85"),
-        // RWD Performance Models
-        P85("P85"),
-        P85Plus("P85+"),
-        // AWD Standard & Performance Models
-        S70D("S70D"),
-        S85D("S85D"),
-        P85D("P85D");
+        MDLS("Model S"),
+        MDLX("Model X"),
+        MDL3("Model 3"),
+        Unknown("Unknown");
         
         private String descriptiveName;
 
         Model(String name) { this.descriptiveName = name; }
+
+        @Override public String toString() { return descriptiveName; }        
+    }
+    
+    public enum ModelType {
+        // MODEL S
+        // RWD Standard Models
+        S40("40"),
+        S60("60"),
+        S70("70"),
+        S75("75"),
+        S85("85"),
+        // RWD Performance Models
+        P85("P85"),
+        P85Plus("P85+"),
+        // AWD Standard & Performance Models
+        S60D("60D"),
+        S70D("70D"),
+        S75D("75D"),
+        S85D("85D"),
+        P85D("P85D"),
+        S90D("90D"),
+        P90D("P90D"),
+        S100D("100D"),
+        P100D("P100D"),
+        
+        // MODEL 3
+        THREE75("LR"),
+        Unknown("Unknown");
+        
+        private String descriptiveName;
+
+        ModelType(String name) { this.descriptiveName = name; }
 
         @Override public String toString() { return descriptiveName; }
     };
@@ -337,16 +383,20 @@ public class Options {
         if (dt == Options.DriveType.Unknown) { return Options.DriveType.DV2W; }
         return dt;
     }
-    public Model model() {
+    public Model model() { return optionToEnum(Model.class, "MD"); }
+    
+    public ModelType modelType() {
+        if (batteryType() == Options.BatteryType.BT37) { return ModelType.THREE75; }
+        
         if (isAWD()) {
-            if (isP85D()) { return Model.P85D; }
-            if (batteryType() == Options.BatteryType.BT85) { return Model.S85D; }
-            return Model.S70D;
+            if (isP85D()) { return ModelType.P85D; }
+            if (batteryType() == Options.BatteryType.BT85) { return ModelType.S85D; }
+            return ModelType.S70D;
         }
-        if (isPerfPlus()) { return Model.P85Plus; }
-        else if (isPerformance()) { return Model.P85; }
-        else if (batteryType() == Options.BatteryType.BT85) { return Model.S85; } 
-        return Model.S60;
+        if (isPerfPlus()) { return ModelType.P85Plus; }
+        else if (isPerformance()) { return ModelType.P85; }
+        else if (batteryType() == Options.BatteryType.BT85) { return ModelType.S85; } 
+        return ModelType.S60;
     }
     public int productionYear() { return productionYear; }
 
@@ -361,6 +411,10 @@ public class Options {
     public boolean hasAudioUpgrade() { return hasOption("AU"); }
     public boolean hasTwinCharger() { return hasOption("CH"); }
     public boolean hasHPWC() { return hasOption("HP"); }
+    public boolean hasHEPAFilter() { return hasOption("AF"); }
+    public boolean hasAutoPilot() { return hasOption("DA"); }
+    public boolean hasLudicrousSpeed() { return hasOption("BP"); }
+    public boolean hasBatterySoftwareLimit() { return hasOption("BR"); }
     public boolean hasPaintArmor() { return hasOption("PA"); }
     public boolean hasParcelShelf() { return hasOption("PS"); }
     public boolean hasPowerLiftgate() { return hasOption("X001"); }
@@ -369,7 +423,11 @@ public class Options {
     public boolean hasHomeLink() { return hasOption("X011"); }
     public boolean hasSatRadio() { return hasOption("X013"); }
     public boolean hasPerfExterior() { return hasOption("X019"); }
+    public boolean hasSpoiler() { return hasOption("X019"); }
     public boolean hasPerfPowertrain() { return hasOption("X024"); }
+    public boolean hasLightedDoorHandles() { return hasOption("X027"); }
+    public boolean hasKeylessEntry() { return hasOption("X031"); }
+    public boolean hasFoldingMirrors() { return hasOption("X037"); }
     public boolean hasParkingSensors() { return hasOption("PK"); }
     public boolean hasLightingPackage() { return hasOption("LP"); }
     public boolean hasSecurityPackage() { return hasOption("SP"); }
@@ -383,6 +441,7 @@ public class Options {
     @Override
     public String toString() {
         return String.format(
+                "    Model: %s %s\n" +
                 "    Region: %s\n" +
                 "    Year: %d\n" +
                 "    Trim: %s\n" +
@@ -431,8 +490,8 @@ public class Options {
                 "        Fog Lamps: %b\n" +
                 "        Cold Weather Package: %b\n" +
                 "    ]\n",
-                region(), productionYear(), trimLevel(), driveSide(), isAWD(),
-                isPerformance(), isPerfPlus(), isP85D(),
+                model(), modelType(), region(), productionYear(), trimLevel(), driveSide(),
+                isAWD(), isPerformance(), isPerfPlus(), isP85D(),
                 hasPerfExterior(), hasPerfPowertrain(),
                 batteryType(), paintColor(), roofType(), wheelType(),
                 seatType(), decorType(), hasExtendedNappaTrim(), hasAirSuspension(),

@@ -62,17 +62,22 @@ public class GeoUtils {
         geocoderRequest = new GeocoderRequestBuilder()
                 .setLocation(new LatLng(lat, lng))
                 .setLanguage("en").getGeocoderRequest();
-        geocoderResponse = geocoder.geocode(geocoderRequest);
-        if (geocoderResponse != null) {
-            if (geocoderResponse.getStatus() == GeocoderStatus.OK) {
-                if (!geocoderResponse.getResults().isEmpty()) {
-                    GeocoderResult geocoderResult = // Get the first result
-                            geocoderResponse.getResults().iterator().next();
-                    resultAddr = geocoderResult.getFormattedAddress();
-                    synchronized (cache) { cache.put(cacheKey, resultAddr); }
-                    return resultAddr;
+        try {
+            geocoderResponse = geocoder.geocode(geocoderRequest);
+            if (geocoderResponse != null) {
+                if (geocoderResponse.getStatus() == GeocoderStatus.OK) {
+                    if (!geocoderResponse.getResults().isEmpty()) {
+                        GeocoderResult geocoderResult = // Get the first result
+                                geocoderResponse.getResults().iterator().next();
+                        resultAddr = geocoderResult.getFormattedAddress();
+                        synchronized (cache) { cache.put(cacheKey, resultAddr); }
+                        return resultAddr;
+                    }
                 }
             }
+        } catch (IOException ex) {
+            Tesla.logger.warning("Error translating geographical address: " + ex.getMessage());
+            return null;
         }
         return null;
     }
@@ -87,19 +92,24 @@ public class GeoUtils {
         geocoderRequest = new GeocoderRequestBuilder()
                 .setAddress(addr)
                 .setLanguage("en").getGeocoderRequest();
-        geocoderResponse = geocoder.geocode(geocoderRequest);
-        if (geocoderResponse != null) {
-            if (geocoderResponse.getStatus() == GeocoderStatus.OK) {
-                if (!geocoderResponse.getResults().isEmpty()) {
-                    GeocoderResult geocoderResult = // Get the first result
-                            geocoderResponse.getResults().iterator().next();
-                    double[] loc = new double[2];
-                    LatLng ll = geocoderResult.getGeometry().getLocation();
-                    loc[0] = ll.getLat().doubleValue();
-                    loc[1] = ll.getLng().doubleValue();
-                    return loc;
+        try {
+            geocoderResponse = geocoder.geocode(geocoderRequest);
+            if (geocoderResponse != null) {
+                if (geocoderResponse.getStatus() == GeocoderStatus.OK) {
+                    if (!geocoderResponse.getResults().isEmpty()) {
+                        GeocoderResult geocoderResult = // Get the first result
+                                geocoderResponse.getResults().iterator().next();
+                        double[] loc = new double[2];
+                        LatLng ll = geocoderResult.getGeometry().getLocation();
+                        loc[0] = ll.getLat().doubleValue();
+                        loc[1] = ll.getLng().doubleValue();
+                        return loc;
+                    }
                 }
-            }
+            }    
+        } catch (IOException ex) {
+            Tesla.logger.warning("Error translating geographical address: " + ex.getMessage());
+            return null;
         }
         return null;
     }

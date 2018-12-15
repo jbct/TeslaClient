@@ -8,6 +8,7 @@ package org.noroomattheinn.tesla;
 
 import org.noroomattheinn.utils.Utils;
 import us.monoid.json.JSONObject;
+import us.monoid.json.JSONArray;
 
 /**
  * VehicleState: Contains an assortment of information about the current state
@@ -24,12 +25,15 @@ public class VehicleState extends BaseState {
  * 
  *----------------------------------------------------------------------------*/
     public enum PanoPosition {open, closed, vent, comfort, moving, unknown, Unknown};
+    public enum AutoParkState {ready, unavailable, Unknown};
+    public enum AutoParkStyle {standard, Unknown};
     
 /*------------------------------------------------------------------------------
  *
  * Public State
  * 
  *----------------------------------------------------------------------------*/
+    public final  int      apiVersion;
     public final  boolean  isDFOpen;
     public final  boolean  isPFOpen;
     public final  boolean  isDROpen;
@@ -41,12 +45,34 @@ public class VehicleState extends BaseState {
     public final  int      panoPercent;
     public final  PanoPosition panoState;
     public final  String   version;
-    public final  boolean  hasDarkRims;
-    public final  String   wheelType;
-    public final  boolean  hasSpoiler;
-    public final  String   roofColor;
-    public final  String   perfConfig;
     public final  boolean  remoteStart;
+    public final  String   autoParkState;       // Need more enumerations
+    public final  String   autoParkStyle;       // Need more enumerations
+    public final  String   lastAutoParkError;
+    public final  boolean  isCalendarSupported;
+    public final  String   centerDisplayState;  // Not clear what this represents
+    public final  boolean  isHomelinkNearby; 
+    public final  boolean  isUserPresent;
+    public final  double   odometer;
+    public final  boolean  isRemoteStartSupported;
+    public final  boolean  areNotificationsSupported;
+    public final  boolean  isParsedCalendarSupported;
+    public final  boolean  isValetModeEnabled;
+    public final  boolean  isValetPinNeeded;
+    public final  String   vehicleName;
+
+    public        boolean  isRemoteControlEnabled;
+    public        int      softwareUpdateExpectedDuration;
+    public        String   softwareUpdateStatus;
+    public        boolean  isSpeedLimitModeOn;
+    public        double   speedLimitCurrent;
+    public        int      speedLimitMax;
+    public        int      speedLimitMin;
+    public        boolean  isSpeedLimitPinSet;
+    
+    protected final  JSONObject mediaState;    
+    protected final  JSONObject softwareUpdate;
+    protected final  JSONObject speedLimitMode;
     
 /*==============================================================================
  * -------                                                               -------
@@ -56,6 +82,7 @@ public class VehicleState extends BaseState {
     
     public VehicleState(JSONObject source) {
         super(source);
+        apiVersion = source.optInt("api_version");
         isDFOpen = source.optInt("df") != 0;
         isPFOpen = source.optInt("pf") != 0;
         isDROpen = source.optInt("dr") != 0;
@@ -63,17 +90,55 @@ public class VehicleState extends BaseState {
         isFTOpen = source.optInt("ft") != 0;
         isRTOpen = source.optInt("rt") != 0;
         locked = source.optBoolean("locked");
-        hasPano = source.optInt("sun_roof_installed") != 0;
         panoPercent = source.optInt("sun_roof_percent_open");
         panoState = Utils.stringToEnum(
                 VehicleState.PanoPosition.class, source.optString("sun_roof_state"));
+        hasPano = (panoState != PanoPosition.Unknown && panoState != PanoPosition.unknown);
         version = source.optString("car_version");
-        hasDarkRims = source.optBoolean("dark_rims");
-        wheelType = source.optString("wheel_type");
-        hasSpoiler = source.optBoolean("has_spoiler");
-        roofColor = source.optString("roof_color");
-        perfConfig = source.optString("perf_config");
         remoteStart = source.optBoolean("remote_start");
+        
+        autoParkState = source.optString("autopark_state_v2");
+        autoParkStyle = source.optString("autopark_style");
+        lastAutoParkError = source.optString("last_autopark_error");
+        odometer = source.optDouble("odometer");
+        centerDisplayState = source.optString("center_display_state");
+        isCalendarSupported = source.optBoolean("calendar_supported");
+        areNotificationsSupported = source.optBoolean("notifications_supported");
+        isParsedCalendarSupported = source.optBoolean("parsed_calendar_supported");
+        isHomelinkNearby = source.optBoolean("homelink_nearby");
+        isRemoteStartSupported = source.optBoolean("remote_start_supported");
+        isUserPresent = source.optBoolean("is_user_present");
+        isValetModeEnabled = source.optBoolean("valet_mode");
+        isValetPinNeeded = source.optBoolean("valet_pin_needed");
+        vehicleName = source.optString("vehicle_name");
+        
+        mediaState = source.optJSONObject("media_state");
+        isRemoteControlEnabled = false;
+        if (mediaState != null) {
+            isRemoteControlEnabled = mediaState.optBoolean("remote_control_enabled");
+        }
+        
+        softwareUpdate = source.optJSONObject("software_update");
+        softwareUpdateExpectedDuration = 0;
+        softwareUpdateStatus = "";
+        if (softwareUpdate != null) {
+            softwareUpdateExpectedDuration = softwareUpdate.optInt("expected_duration_sec");
+            softwareUpdateStatus = softwareUpdate.optString("status");
+        }
+        
+        speedLimitMode = source.optJSONObject("speed_limit_mode");
+        isSpeedLimitModeOn = false;
+        isSpeedLimitPinSet = false;
+        speedLimitCurrent = 0.0;
+        speedLimitMax = 0;
+        speedLimitMin = 0;
+        if (speedLimitMode != null) {
+            isSpeedLimitModeOn = speedLimitMode.optBoolean("active");
+            speedLimitCurrent = speedLimitMode.optDouble("current_limit_mph");
+            speedLimitMax = speedLimitMode.optInt("max_limit_mph");
+            speedLimitMin = speedLimitMode.optInt("min_limit_mph");
+            isSpeedLimitPinSet = speedLimitMode.optBoolean("pin_code_set");
+        }
     }
     
     @Override public String toString() {

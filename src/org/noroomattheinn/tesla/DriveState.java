@@ -23,11 +23,16 @@ public class DriveState extends BaseState {
  * 
  *----------------------------------------------------------------------------*/
     public final double   latitude;
+    public final double   nativeLatitude;
     public final double   longitude;
+    public final double   nativeLongitude;
+    public final int      nativeLocationSupported;
+    public final String   nativeType;
     public final int      heading;
     public final int      gpsAsOf;
     public final String   shiftState;   // Not clear what this represents or its type
     public final String   speed;        // Not clear what this represents or its type
+    public final int      power;
     
 /*==============================================================================
  * -------                                                               -------
@@ -38,11 +43,16 @@ public class DriveState extends BaseState {
     public DriveState(JSONObject source) {
         super(source);
         latitude = source.optDouble("latitude"); 
+        nativeLatitude = source.optDouble("native_latitude");
         longitude = source.optDouble("longitude"); 
+        nativeLongitude = source.optDouble("native_longitude");
+        nativeLocationSupported = source.optInt("native_location_supported");
+        nativeType = source.optString("native_type");
         heading = source.optInt("heading"); 
         gpsAsOf = source.optInt("gps_as_of"); 
         shiftState = source.optString("shift_state"); 
         speed = source.optString("speed"); 
+        power = source.optInt("power");
     }
     
     @Override public String toString() {

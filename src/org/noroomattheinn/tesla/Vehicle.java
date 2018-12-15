@@ -23,7 +23,7 @@ import us.monoid.json.JSONObject;
  * A good running description of the overall Tesla REST API is given in this 
  * <a href="http://goo.gl/Z1Lul" target="_blank">Google Doc</a>. More notes and
  * a mockup can also be found at
- * <a href="http://docs.timdorr.apiary.io" target="_blank">docs.timdorr.apiary.io</a>.
+ * <a href="https://tesla-api.timdorr.com/" target="_blank">tesla-api.timdorr.com</a>.
  * 
  * @author Joe Pasqua <joe at NoRoomAtTheInn dot org>
  */
@@ -35,7 +35,7 @@ public class Vehicle {
  * 
  *----------------------------------------------------------------------------*/
     public static enum StateType {Charge, Drive, GUI, HVAC, Vehicle};
-    public enum PanoCommand {open, comfort, vent, close};
+    public enum PanoCommand {vent, close};
 
     // The following are effectively constants, but are set in the constructor
     private final String    ChargeEndpoint, DriveEndpoint, GUIEndpoint,
@@ -43,11 +43,17 @@ public class Vehicle {
     private final String    HVAC_Start, HVAC_Stop, HVAC_SetTemp;
     private final String    Charge_Start, Charge_Stop, Charge_SetMax,
                             Charge_SetStd, Charge_SetPct;
-    private final String    Doors_OpenChargePort, Doors_Unlock, Doors_Lock,
-                            Doors_Sunroof, Doors_Trunk;
+    private final String    Doors_OpenChargePort, Doors_CloseChargePort, Doors_Unlock,
+                            Doors_Lock, Doors_Sunroof, Doors_Trunk;
     private final String    Action_Honk, Action_Flash, Action_Wakeup, Action_RemoteStart;
-
-
+    private final String    SpeedLimit_Set, SpeedLimit_Enable, SpeedLimit_Disable,
+                            SpeedLimit_ClearPin;
+    private final String    ValetMode_Enable, ValetMode_ClearPin;
+    private final String    Media_Toggle_Playback, Media_Next_Track, Media_Prev_Track,
+                            Media_Next_Fav, Media_Prev_Fav, Media_VolumeUp, Media_VolumeDown;
+    private final String    Schedule_SWUpdate, Cancel_SWUpdate;
+// Need Navigation
+    
 /*------------------------------------------------------------------------------
  *
  * Internal State
@@ -67,11 +73,12 @@ public class Vehicle {
     private final Options       options;
     private final String        baseValues;
     private final String        displayName;
-    private final boolean       remoteStartEnabled;
-    private final boolean       notificationsEnabled;
-    private final boolean       calendarEnabled;
     private final String        uuid;
-    
+    private final boolean       isInService;
+    private final int           apiVersion;
+    private final String        vehicleID2;      // Not clear what this represents
+    private final String        backSeatToken;
+    private final String        backSeatTokenUpdated;
 
 /*==============================================================================
  * -------                                                               -------
@@ -91,9 +98,11 @@ public class Vehicle {
         vin = description.optString("vin");
         uuid = DigestUtils.sha256Hex(vin);
         status = description.optString("state");
-        remoteStartEnabled = description.optBoolean("remote_start_enabled");
-        notificationsEnabled = description.optBoolean("notifications_enabled");
-        calendarEnabled = description.optBoolean("calendar_enabled");
+        isInService = description.optBoolean("in_service");
+        apiVersion = description.optInt("api_version");
+        vehicleID2 = description.optString("id_s");
+        backSeatToken = description.optString("backseat_token");
+        backSeatTokenUpdated = description.optString("backseat_token_updated_at");
         
         // Get the streaming tokens if they exist...
         streamingTokens = new String[2];
@@ -117,6 +126,7 @@ public class Vehicle {
         GUIEndpoint = tesla.vehicleData(vehicleID, "gui_settings");
         HVACEndpoint = tesla.vehicleData(vehicleID, "climate_state");
         VehicleStateEndpoint = tesla.vehicleData(vehicleID, "vehicle_state");
+        // TODO: FETCH VehicleConfig
         
         // Initialize HVAC endpoints
         HVAC_Start = tesla.vehicleCommand(vehicleID, "auto_conditioning_start");
@@ -132,18 +142,41 @@ public class Vehicle {
         
         // Initialize Door endpoints
         Doors_OpenChargePort = tesla.vehicleCommand(vehicleID, "charge_port_door_open");
+        Doors_CloseChargePort = tesla.vehicleCommand(vehicleID, "charge_port_door_close");
         Doors_Unlock = tesla.vehicleCommand(vehicleID, "door_unlock");
         Doors_Lock = tesla.vehicleCommand(vehicleID, "door_lock");
         Doors_Sunroof = tesla.vehicleCommand(vehicleID, "sun_roof_control");
-        Doors_Trunk = tesla.vehicleCommand(vehicleID, "trunk_open");
+        Doors_Trunk = tesla.vehicleCommand(vehicleID, "actuate_trunk");
         
         // Initialize Action Endpoints
         Action_Honk = tesla.vehicleCommand(vehicleID, "honk_horn");
         Action_Flash = tesla.vehicleCommand(vehicleID, "flash_lights");
         Action_RemoteStart = tesla.vehicleCommand(vehicleID, "remote_start_drive");
-        Action_Wakeup = tesla.vehicleSpecific(vehicleID, "wake_up");        
+        Action_Wakeup = tesla.vehicleSpecific(vehicleID, "wake_up");
+        
+        // Initialize Speed Limit Endpoints
+        SpeedLimit_Set = tesla.vehicleCommand(vehicleID, "speed_limit_set_limit");
+        SpeedLimit_Enable = tesla.vehicleCommand(vehicleID, "speed_limit_activate");
+        SpeedLimit_Disable = tesla.vehicleCommand(vehicleID, "speed_limit_deactivate");
+        SpeedLimit_ClearPin = tesla.vehicleCommand(vehicleID, "speed_limit_clear_pin");
+        
+        // Initialize Valet Mode Endpoints
+        ValetMode_Enable = tesla.vehicleCommand(vehicleID, "set_valet_mode");
+        ValetMode_ClearPin = tesla.vehicleCommand(vehicleID, "reset_valet_pin");
+        
+        // Initialize Media Endpoints
+        Media_Toggle_Playback = tesla.vehicleCommand(vehicleID, "media_toggle_playback");
+        Media_Next_Track = tesla.vehicleCommand(vehicleID, "media_next_track");
+        Media_Prev_Track = tesla.vehicleCommand(vehicleID, "media_prev_track");
+        Media_Next_Fav = tesla.vehicleCommand(vehicleID, "media_next_fav");
+        Media_Prev_Fav = tesla.vehicleCommand(vehicleID, "media_prev_fav");
+        Media_VolumeUp = tesla.vehicleCommand(vehicleID, "media_volume_up");
+        Media_VolumeDown = tesla.vehicleCommand(vehicleID, "media_volume_down");
+        
+        // Initialize Software Update Endpoints
+        Schedule_SWUpdate = tesla.vehicleCommand(vehicleID, "schedule_software_update");
+        Cancel_SWUpdate = tesla.vehicleCommand(vehicleID, "cancel_software_update");
     }
-    
     
 /*------------------------------------------------------------------------------
  *
@@ -159,9 +192,6 @@ public class Vehicle {
     public Options  getOptions() { return options; }
     public String   getStreamingToken() { return streamingTokens[0]; }
     public String   getDisplayName() { return displayName; }
-    public boolean  remoteStartEnabled() { return remoteStartEnabled; }
-    public boolean  notificationsEnabled() { return notificationsEnabled; }
-    public boolean  calendarEnabled() { return calendarEnabled; }
     public String   getUnderlyingValues() { return baseValues; }
     public boolean  isAsleep() { return !isAwake(); }
     public boolean  mobileEnabled() {
@@ -191,7 +221,7 @@ public class Vehicle {
             case HVAC: return queryHVAC();
             case Vehicle: return queryVehicle();
             default:
-                Tesla.logger.severe("Unexpected query type: " + which);
+                Tesla.logger.log(Level.SEVERE, "Unexpected query type: {0}", which);
                 return null;
         }
     }
@@ -209,7 +239,8 @@ public class Vehicle {
         return new HVACState(tesla.getState(HVACEndpoint));
     }
     public VehicleState queryVehicle() {
-        return new VehicleState(tesla.getState(VehicleStateEndpoint));
+        VehicleState vh = new VehicleState(tesla.getState(VehicleStateEndpoint));
+        return vh;
     }
     public Streamer getStreamer() { return streamer; }
 
@@ -275,6 +306,117 @@ public class Vehicle {
         }
         return new Result(response);
     }
+
+/*------------------------------------------------------------------------------
+ *
+ * Methods to control speed limits
+ * 
+ *----------------------------------------------------------------------------*/
+ 
+    public Result enableSpeedLimiting(int pinCode) {
+        if (pinCode < 1000 || pinCode > 9999)
+            return new Result(false, "value out of range");         
+        JSONObject response = tesla.invokeCommand(SpeedLimit_Enable,
+                 String.format("{'pin' : '%d'}", pinCode));
+
+        return new Result(response);
+    }
+
+    public Result disableSpeedLimiting(int pinCode) {
+        if (pinCode < 1000 || pinCode > 9999)
+            return new Result(false, "value out of range");         
+        JSONObject response = tesla.invokeCommand(SpeedLimit_Disable,
+                 String.format("{'pin' : '%d'}", pinCode));
+
+        return new Result(response);
+    }
+     
+    public Result clearSpeedLimitPin(int pinCode) {
+        if (pinCode < 1000 || pinCode > 9999)
+            return new Result(false, "value out of range");        
+        JSONObject response = tesla.invokeCommand(SpeedLimit_ClearPin,
+            String.format("{'pin' : '%d'}", pinCode));
+     
+        return new Result(response);
+    }
+
+    public Result setSpeedLimit(int speedInMph) {
+        if (speedInMph < 50 || speedInMph > 90)
+            return new Result(false, "value out of range");      
+        JSONObject response = tesla.invokeCommand(SpeedLimit_Set,
+            String.format("{'limit_mph' : '%d'}", speedInMph));
+     
+        return new Result(response);
+    }
+    
+/*------------------------------------------------------------------------------
+ *
+ * Methods to control valet mode
+ * 
+ *----------------------------------------------------------------------------*/
+ 
+    public Result setValetMode(boolean valetEnabled, int pinCode) {
+         if (pinCode < 1000 || pinCode > 9999)
+            return new Result(false, "value out of range");
+         
+        return new Result(tesla.invokeCommand(ValetMode_Enable, 
+                String.format("{'on' : '%b', 'password' : '%d'}", valetEnabled, pinCode)));
+    }
+    
+    public Result clearValetPin() {
+        return new Result(tesla.invokeCommand(ValetMode_ClearPin));
+    }
+    
+/*------------------------------------------------------------------------------
+ *
+ * Methods to control media
+ * 
+ *----------------------------------------------------------------------------*/
+ 
+    public Result toggleMediaPlayback() {
+        return new Result(tesla.invokeCommand(Media_Toggle_Playback));
+    }
+    
+    public Result nextMediaTrack() {
+        return new Result(tesla.invokeCommand(Media_Next_Track));
+    }
+    
+    public Result previousMediaTrack() {
+        return new Result(tesla.invokeCommand(Media_Prev_Track));
+    }
+    
+    public Result nextMediaFavorite() {
+        return new Result(tesla.invokeCommand(Media_Next_Fav));
+    }
+    
+    public Result previousMediaFavorite() {
+        return new Result(tesla.invokeCommand(Media_Prev_Fav));
+    }
+    
+    public Result increaseMediaVolume() {
+        return new Result(tesla.invokeCommand(Media_VolumeUp));
+    }
+    
+    public Result decreaseMediaVolume() {
+        return new Result(tesla.invokeCommand(Media_VolumeDown));
+    }
+    
+/*------------------------------------------------------------------------------
+ *
+ * Methods to schedule software updates
+ * 
+ *----------------------------------------------------------------------------*/
+ 
+    public Result scheduleSoftwareUpdate(int seconds) {
+        return new Result(tesla.invokeCommand(Schedule_SWUpdate, 
+                String.format("{'offset_sec' : '%d'}", seconds)));
+    }
+    
+    public Result doSoftwareUpdate() { return scheduleSoftwareUpdate(0); }
+
+    public Result cancelSoftwareUpdate() {
+        return new Result(tesla.invokeCommand(Cancel_SWUpdate));
+    }
     
 /*------------------------------------------------------------------------------
  *
@@ -294,12 +436,16 @@ public class Vehicle {
         return new Result(tesla.invokeCommand(Doors_OpenChargePort));
     }
     
+    public Result closeChargePort() {
+        return new Result(tesla.invokeCommand(Doors_CloseChargePort));
+    }
+    
     public Result openFrunk() { // Requires 6.0 or greater
-        return new Result(tesla.invokeCommand(Doors_Trunk, "{'whichTrunk' : 'front'}"));
+        return new Result(tesla.invokeCommand(Doors_Trunk, "{'which_trunk' : 'front'}"));
     }
     
     public Result openTrunk() { // Requires 6.0 or greater
-        return new Result(tesla.invokeCommand(Doors_Trunk, "{'whichTrunk' : 'rear'}"));
+        return new Result(tesla.invokeCommand(Doors_Trunk, "{'which_trunk' : 'rear'}"));
     }
     
     public Result setPano(PanoCommand cmd) {
