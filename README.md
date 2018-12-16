@@ -1,4 +1,6 @@
-# Tesla Model S Rest API
+# Tesla Model S Rest API 
+
+[![Build Status](https://travis-ci.org/jbct/TeslaClient.svg?branch=master)](https://travis-ci.org/jbct/TeslaClient)
 
 A Java implementation of the client side interface to the Tesla Model S API documented at:
 
