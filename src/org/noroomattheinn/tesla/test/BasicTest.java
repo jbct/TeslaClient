@@ -60,7 +60,7 @@ public class BasicTest {
 //                System.out.println(ss);
 //                Utils.sleep(500);
 //            }
-            VehicleState vs = vehicle.queryVehicle();
+            VehicleState vs = vehicle.queryVehicleState();
             if (vs.valid) {
                 try {
                     System.out.println(vs.rawState.toString(4));
@@ -74,7 +74,7 @@ public class BasicTest {
             }
             
             vehicle.setPano(Vehicle.PanoCommand.vent);
-            vs = vehicle.queryVehicle();
+            vs = vehicle.queryVehicleState();
             if (vs.valid) {
                 System.out.format("Pano Percent: %d\n", vs.panoPercent);
                 System.out.format("Pano State: %s\n", vs.panoState);

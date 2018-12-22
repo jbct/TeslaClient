@@ -34,12 +34,12 @@ public class Vehicle {
  * Constants and Enums
  * 
  *----------------------------------------------------------------------------*/
-    public static enum StateType {Charge, Drive, GUI, HVAC, Vehicle};
+    public static enum StateType {Charge, Drive, GUI, HVAC, VehicleState, VehicleConfig};
     public enum PanoCommand {vent, close};
 
     // The following are effectively constants, but are set in the constructor
     private final String    ChargeEndpoint, DriveEndpoint, GUIEndpoint,
-                            HVACEndpoint, VehicleStateEndpoint;
+                            HVACEndpoint, VehicleStateEndpoint, VehicleConfigEndpoint;
     private final String    HVAC_Start, HVAC_Stop, HVAC_SetTemp;
     private final String    Charge_Start, Charge_Stop, Charge_SetMax,
                             Charge_SetStd, Charge_SetPct;
@@ -126,7 +126,7 @@ public class Vehicle {
         GUIEndpoint = tesla.vehicleData(vehicleID, "gui_settings");
         HVACEndpoint = tesla.vehicleData(vehicleID, "climate_state");
         VehicleStateEndpoint = tesla.vehicleData(vehicleID, "vehicle_state");
-        // TODO: FETCH VehicleConfig
+        VehicleConfigEndpoint = tesla.vehicleData(vehicleID, "vehicle_config");
         
         // Initialize HVAC endpoints
         HVAC_Start = tesla.vehicleCommand(vehicleID, "auto_conditioning_start");
@@ -219,7 +219,8 @@ public class Vehicle {
             case Drive: return queryDrive();
             case GUI: return queryGUI();
             case HVAC: return queryHVAC();
-            case Vehicle: return queryVehicle();
+            case VehicleState: return queryVehicleState();
+            case VehicleConfig: return queryVehicleConfig();
             default:
                 Tesla.logger.log(Level.SEVERE, "Unexpected query type: {0}", which);
                 return null;
@@ -238,8 +239,11 @@ public class Vehicle {
     public HVACState queryHVAC() {
         return new HVACState(tesla.getState(HVACEndpoint));
     }
-    public VehicleState queryVehicle() {
-        VehicleState vh = new VehicleState(tesla.getState(VehicleStateEndpoint));
+    public VehicleState queryVehicleState() {
+        return new VehicleState(tesla.getState(VehicleStateEndpoint));
+    }
+    public VehicleConfig queryVehicleConfig() {
+        VehicleConfig vh = new VehicleConfig(tesla.getState(VehicleConfigEndpoint));
         return vh;
     }
     public Streamer getStreamer() { return streamer; }
@@ -313,29 +317,29 @@ public class Vehicle {
  * 
  *----------------------------------------------------------------------------*/
  
-    public Result enableSpeedLimiting(int pinCode) {
-        if (pinCode < 1000 || pinCode > 9999)
+    public Result enableSpeedLimiting(String pinCode) {
+        if (pinCode != null && pinCode.length() != 4)
             return new Result(false, "value out of range");         
         JSONObject response = tesla.invokeCommand(SpeedLimit_Enable,
-                 String.format("{'pin' : '%d'}", pinCode));
+                 String.format("{'pin' : '%s'}", pinCode));
 
         return new Result(response);
     }
 
-    public Result disableSpeedLimiting(int pinCode) {
-        if (pinCode < 1000 || pinCode > 9999)
+    public Result disableSpeedLimiting(String pinCode) {
+        if (pinCode != null && pinCode.length() != 4)
             return new Result(false, "value out of range");         
         JSONObject response = tesla.invokeCommand(SpeedLimit_Disable,
-                 String.format("{'pin' : '%d'}", pinCode));
+                 String.format("{'pin' : '%s'}", pinCode));
 
         return new Result(response);
     }
      
-    public Result clearSpeedLimitPin(int pinCode) {
-        if (pinCode < 1000 || pinCode > 9999)
+    public Result clearSpeedLimitPin(String pinCode) {
+        if (pinCode != null && pinCode.length() != 4)
             return new Result(false, "value out of range");        
         JSONObject response = tesla.invokeCommand(SpeedLimit_ClearPin,
-            String.format("{'pin' : '%d'}", pinCode));
+            String.format("{'pin' : '%s'}", pinCode));
      
         return new Result(response);
     }
@@ -355,12 +359,12 @@ public class Vehicle {
  * 
  *----------------------------------------------------------------------------*/
  
-    public Result setValetMode(boolean valetEnabled, int pinCode) {
-         if (pinCode < 1000 || pinCode > 9999)
+    public Result setValetMode(boolean valetEnabled, String pinCode) {
+         if (pinCode != null && pinCode.length() != 4)
             return new Result(false, "value out of range");
          
         return new Result(tesla.invokeCommand(ValetMode_Enable, 
-                String.format("{'on' : '%b', 'password' : '%d'}", valetEnabled, pinCode)));
+                String.format("{'on' : '%b', 'password' : '%s'}", valetEnabled, pinCode)));
     }
     
     public Result clearValetPin() {

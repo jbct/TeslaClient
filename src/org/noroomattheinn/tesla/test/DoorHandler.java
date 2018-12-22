@@ -59,7 +59,7 @@ public class DoorHandler extends TeslaHandler  {
     class DisplayHandler extends Handler {
         DisplayHandler() { super("display", "Display Door State", "d"); }
         @Override public boolean execute() {
-            state = vehicle.queryVehicle();
+            state = vehicle.queryVehicleState();
             if (state.valid)
                 System.out.format("Door State:\n%s\n", state);
             else

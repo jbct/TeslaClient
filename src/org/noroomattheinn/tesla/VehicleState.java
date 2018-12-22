@@ -8,7 +8,6 @@ package org.noroomattheinn.tesla;
 
 import org.noroomattheinn.utils.Utils;
 import us.monoid.json.JSONObject;
-import us.monoid.json.JSONArray;
 
 /**
  * VehicleState: Contains an assortment of information about the current state
@@ -64,6 +63,7 @@ public class VehicleState extends BaseState {
     public        boolean  isRemoteControlEnabled;
     public        int      softwareUpdateExpectedDuration;
     public        String   softwareUpdateStatus;
+    public        boolean  hasSoftwareUpdateAvailable;
     public        boolean  isSpeedLimitModeOn;
     public        double   speedLimitCurrent;
     public        int      speedLimitMax;
@@ -125,6 +125,7 @@ public class VehicleState extends BaseState {
             softwareUpdateExpectedDuration = softwareUpdate.optInt("expected_duration_sec");
             softwareUpdateStatus = softwareUpdate.optString("status");
         }
+        hasSoftwareUpdateAvailable = (softwareUpdateStatus != null && !softwareUpdateStatus.isEmpty());
         
         speedLimitMode = source.optJSONObject("speed_limit_mode");
         isSpeedLimitModeOn = false;
